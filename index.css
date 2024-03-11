@@ -68,7 +68,9 @@ body {
   display: flex;
   flex-direction: row;
   padding: 0 calc(50% - 490px);
-  border: 1px solid black;
+  border-width: 1px 0;
+  border-color:lightgrey;
+  border-style:solid;
   position: relative;
   z-index:2;
   background-color: white;
