@@ -14,7 +14,7 @@ const colorMap = {
   "알 수 없음": { 맑음: "#ffffff", 탁함: "#808080" },
 };
 
-// 반응 로그용 선택 항목
+// 반응 로그용 선탱 항목
 const actors = ["감자", "찐", "넛", "루비", "탱", "게스트"];
 const actions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const results = ["O", "X"];
@@ -162,7 +162,7 @@ function ReactionEntry({ entry, onEntryChange, onDelete }) {
         onChange={(e) => handleChange("actor1", e.target.value)}
         style={{ marginRight: 4 }}
       >
-        {["감자", "찐", "넛", "루비", "택", "게스트"].map((actor) => (
+        {["감자", "찐", "넛", "루비", "탱", "게스트"].map((actor) => (
           <option key={actor} value={actor}>
             {actor}
           </option>
@@ -185,7 +185,7 @@ function ReactionEntry({ entry, onEntryChange, onDelete }) {
         onChange={(e) => handleChange("actor2", e.target.value)}
         style={{ marginLeft: 4, marginRight: 4 }}
       >
-        {["감자", "찐", "넛", "루비", "택", "게스트"].map((actor) => (
+        {["감자", "찐", "넛", "루비", "탱", "게스트"].map((actor) => (
           <option key={actor} value={actor}>
             {actor}
           </option>
