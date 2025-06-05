@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/juwon5272.github.io/grid/", // GitHub 저장소 이름으로 수정
+  base: "/", // 반드시 "/"로 설정
 });
 
 // import { defineConfig } from 'vite'
