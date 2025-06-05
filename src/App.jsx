@@ -15,7 +15,7 @@ const colorMap = {
 };
 
 // 반응 로그용 선택 항목
-const actors = ["감자", "찐", "넛", "루비", "택", "게스트"];
+const actors = ["감자", "찐", "넛", "루비", "탱", "게스트"];
 const actions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const results = ["O", "X"];
 
