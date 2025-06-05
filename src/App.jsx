@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
-const elements = ["물", "불", "흙", "나무", "철"];
+const elements = ["알 수 없음", "물", "불", "흙", "나무", "철"];
 const states = ["맑음", "탁함"];
-const STORAGE_KEY = "myGridData";
+const STORAGE_KEY = "myGridsData";
 
 // 색상 매핑: 맑음(연한색), 탁함(진한색)
 const colorMap = {
@@ -11,10 +11,11 @@ const colorMap = {
   철: { 맑음: "#d3d3d3", 탁함: "#4b4b4b" }, // 회색
   나무: { 맑음: "#b7e4c7", 탁함: "#2d6a4f" }, // 초록
   흙: { 맑음: "#d7b49e", 탁함: "#6b4226" }, // 갈색
+  "알 수 없음": { 맑음: "#ffffff", 탁함: "#808080" }, // 흰색/회색
 };
 
 function Cell({ cellData, onChange }) {
-  const bgColor = colorMap[cellData.element][cellData.state];
+  const bgColor = colorMap[cellData.element][cellData.state] || "#ffffff"; // 기본 흰색
 
   return (
     <div
@@ -63,31 +64,146 @@ function Cell({ cellData, onChange }) {
   );
 }
 
-export default function Grid() {
-  const getInitialGrid = () => {
+function Grid({ gridData, onChange, title, onTitleChange, onDelete }) {
+  return (
+    <div
+      style={{
+        marginBottom: 20,
+        border: "1px solid #ccc",
+        borderRadius: 8,
+        padding: 16,
+        backgroundColor: "#fff",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        position: "relative",
+      }}
+    >
+      <input
+        type="text"
+        placeholder="제목을 입력하세요"
+        value={title}
+        onChange={(e) => onTitleChange(e.target.value)}
+        style={{
+          width: "100%",
+          marginBottom: 12,
+          padding: 8,
+          boxSizing: "border-box",
+          border: "1px solid #ddd",
+          borderRadius: 4,
+        }}
+      />
+      <button
+        onClick={onDelete}
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          backgroundColor: "#e74c3c",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          width: 30,
+          height: 30,
+          cursor: "pointer",
+          fontWeight: "bold",
+          fontSize: 18,
+          lineHeight: "30px",
+          textAlign: "center",
+          padding: 0,
+        }}
+        title="삭제"
+      >
+        &times;
+      </button>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 8,
+          width: "100%",
+          maxWidth: 340,
+          margin: "0 auto",
+          boxSizing: "border-box",
+        }}
+      >
+        {gridData.map((row, r) =>
+          row.map((cell, c) => (
+            <Cell
+              key={`${r}-${c}`}
+              cellData={cell}
+              onChange={(newCellData) => onChange(r, c, newCellData)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const getInitialGrids = () => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) return JSON.parse(saved);
-    return Array(3)
-      .fill(null)
-      .map(() =>
-        Array(3)
+    return [
+      {
+        title: "새로운 칸",
+        grid: Array(3)
           .fill(null)
-          .map(() => ({ element: "물", state: "맑음" }))
-      );
+          .map(() =>
+            Array(3)
+              .fill(null)
+              .map(() => ({ element: "물", state: "맑음" }))
+          ),
+      },
+    ];
   };
 
-  const [grid, setGrid] = useState(getInitialGrid);
+  const [grids, setGrids] = useState(getInitialGrids);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(grid));
-  }, [grid]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(grids));
+  }, [grids]);
 
-  const handleCellChange = (rowIdx, colIdx, newCellData) => {
-    setGrid((grid) =>
-      grid.map((row, r) =>
-        row.map((cell, c) => (r === rowIdx && c === colIdx ? newCellData : cell))
+  const handleCellChange = (gridIndex, rowIdx, colIdx, newCellData) => {
+    setGrids((grids) =>
+      grids.map((gridItem, index) =>
+        index === gridIndex
+          ? {
+              ...gridItem,
+              grid: gridItem.grid.map((row, r) =>
+                row.map((cell, c) => (r === rowIdx && c === colIdx ? newCellData : cell))
+              ),
+            }
+          : gridItem
       )
     );
+  };
+
+  const handleAddGrid = () => {
+    setGrids([
+      ...grids,
+      {
+        title: "새로운 칸",
+        grid: Array(3)
+          .fill(null)
+          .map(() =>
+            Array(3)
+              .fill(null)
+              .map(() => ({ element: "물", state: "맑음" }))
+          ),
+      },
+    ]);
+  };
+
+  const handleTitleChange = (gridIndex, newTitle) => {
+    setGrids((grids) =>
+      grids.map((gridItem, index) =>
+        index === gridIndex ? { ...gridItem, title: newTitle } : gridItem
+      )
+    );
+  };
+
+  const handleDeleteGrid = (gridIndex) => {
+    setGrids((grids) => grids.filter((_, index) => index !== gridIndex));
   };
 
   return (
@@ -97,104 +213,40 @@ export default function Grid() {
         minWidth: "100vw",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
         background: "#f2f2f2",
+        padding: 20,
+        boxSizing: "border-box",
       }}
     >
-      <div
+      <h2 style={{ marginBottom: 20 }}>오행공격 메모장</h2>
+      {grids.map((gridItem, index) => (
+        <Grid
+          key={index}
+          title={gridItem.title}
+          gridData={gridItem.grid}
+          onChange={(rowIdx, colIdx, newCellData) =>
+            handleCellChange(index, rowIdx, colIdx, newCellData)
+          }
+          onTitleChange={(newTitle) => handleTitleChange(index, newTitle)}
+          onDelete={() => handleDeleteGrid(index)}
+        />
+      ))}
+      <button
+        onClick={handleAddGrid}
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 8,
-          width: "100%",
-          maxWidth: 340,
-          margin: "0 auto",
-          padding: "0 8px",
-          boxSizing: "border-box",
+          backgroundColor: "#4CAF50",
+          color: "white",
+          padding: "10px 20px",
+          fontSize: "16px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginTop: 10,
         }}
       >
-        {grid.map((row, r) =>
-          row.map((cell, c) => (
-            <Cell
-              key={`${r}-${c}`}
-              cellData={cell}
-              onChange={(newCellData) => handleCellChange(r, c, newCellData)}
-            />
-          ))
-        )}
-      </div>
+        + 칸 추가
+      </button>
     </div>
   );
 }
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.jsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// export default App
-
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.jsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// export default App
