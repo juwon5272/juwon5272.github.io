@@ -499,34 +499,21 @@ export default function CardGameMemo() {
     return cards;
   }, [gameState]);
 
-  // Calculate unrevealed cards (cards not held by our team or opponents)
+  // Calculate unrevealed cards (cards not revealed in rounds)
   const unrevealedCards = useMemo(() => {
-    const ourTeamCardIds = [];
-    const opponentCardIds = [];
+    const revealedCardIds = [];
 
-    if (gameState.ourTeam) {
-      gameState.ourTeam.forEach((player) => {
-        if (player && player.cards) {
-          player.cards.forEach((card) => {
-            if (card) ourTeamCardIds.push(card);
+    if (gameState.rounds) {
+      gameState.rounds.forEach((round) => {
+        if (round && round.revealedCards) {
+          round.revealedCards.forEach((card) => {
+            if (card) revealedCardIds.push(card);
           });
         }
       });
     }
 
-    if (gameState.opponents && gameState.opponents.players) {
-      gameState.opponents.players.forEach((player) => {
-        if (player && player.cards) {
-          player.cards.forEach((card) => {
-            if (card) opponentCardIds.push(card);
-          });
-        }
-      });
-    }
-
-    const allKnownCards = [...ourTeamCardIds, ...opponentCardIds];
-
-    return DECK.filter((card) => !allKnownCards.includes(card.id));
+    return DECK.filter((card) => !revealedCardIds.includes(card.id));
   }, [gameState]);
 
   // Group unrevealed cards by suit
@@ -650,7 +637,7 @@ export default function CardGameMemo() {
             공개되지 않은 카드 ({unrevealedCards.length}장)
           </h2>
           <div style={{ fontSize: "0.85rem", marginBottom: 8, color: "#666" }}>
-            우리팀과 상대팀이 가지고 있지 않은 카드들
+            라운드별 공개 카드를 제외한 나머지 카드들
           </div>
           <div
             style={{
