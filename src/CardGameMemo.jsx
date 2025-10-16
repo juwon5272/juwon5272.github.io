@@ -470,6 +470,7 @@ export default function CardGameMemo() {
   };
 
   const [gameState, setGameState] = useState(getInitialState);
+  const [showRulesModal, setShowRulesModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
@@ -579,21 +580,38 @@ export default function CardGameMemo() {
           }}
         >
           <h1 style={{ margin: 0, fontSize: "1.4rem" }}>8인 팀 카드 게임 메모</h1>
-          <button
-            onClick={handleReset}
-            style={{
-              padding: "6px 12px",
-              backgroundColor: "#f44336",
-              color: "white",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "0.85rem",
-            }}
-          >
-            초기화
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => setShowRulesModal(true)}
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#2196f3",
+                color: "white",
+                border: "none",
+                borderRadius: 4,
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "0.85rem",
+              }}
+            >
+              Rule
+            </button>
+            <button
+              onClick={handleReset}
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#f44336",
+                color: "white",
+                border: "none",
+                borderRadius: 4,
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "0.85rem",
+              }}
+            >
+              초기화
+            </button>
+          </div>
         </div>
 
         <div
@@ -748,6 +766,131 @@ export default function CardGameMemo() {
           onChange={handleOpponentsChange}
           usedCards={usedCards}
         />
+
+        {/* Rules Modal */}
+        {showRulesModal && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999,
+              padding: "20px",
+            }}
+            onClick={() => setShowRulesModal(false)}
+          >
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: 12,
+                padding: "24px",
+                maxWidth: 700,
+                maxHeight: "90vh",
+                overflowY: "auto",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 16,
+                  borderBottom: "2px solid #2196f3",
+                  paddingBottom: 12,
+                }}
+              >
+                <h2 style={{ margin: 0, color: "#2196f3", fontSize: "1.5rem" }}>
+                  양심의 홀덤 규칙
+                </h2>
+                <button
+                  onClick={() => setShowRulesModal(false)}
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  닫기
+                </button>
+              </div>
+              <div style={{ fontSize: "0.95rem", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
+                {`이번 메인매치는 양심의 홀덤입니다.
+
+<양심의 홀덤>은 4대 4 팀전으로 진행되며 승점이 가장 높은 두 사람이 승리, 가장 낮은 두 사람이 패배하는 게임입니다.
+
+플레이어들은 먼저 카드를 뽑아 순서를 정한 뒤, 1번과 2번 플레이어가 드래프트 방식으로 'Moneta 팀'과 'Honor 팀'을 구성합니다.
+
+이 게임에 사용되는 카드는 트럼프 카드 52장이며 그 중 3장은 공용카드, 1장은 교환카드, 그리고 남은 48장은 6라운드에 걸쳐 플레이어들이 획득하게 될 것입니다.
+
+모든 플레이어에게는 기본 1만 칩이 주어지며, 순서에 따라 추가 칩이 지급됩니다.
+1,2번은 300칩. 3,4번은 200칩. 5,6번은 100칩을 추가로 지급 받습니다.
+이 칩은 이후 라운드의 순서 배팅에 사용됩니다.
+또한 칩은 양도가 불가능합니다.
+
+각 라운드는 다음과 같이 진행됩니다.
+
+카드 공개 — 중간논의 — 순서배팅 — 카드선택 — 종료논의.
+
+카드 공개.
+이번 라운드에 플레이어들이 획득할 수 있는 8장의 카드가 공개됩니다.
+2, 4, 6라운드에서는 공용카드가 1장씩 추가로 공개됩니다.
+
+중간논의
+플레이어들은 15분간 논의 시간을 가진 후, 순서배팅을 진행합니다.
+
+순서배팅
+플레이어들은 매 라운드마다, 비공개로 칩을 배팅해 순서를 정합니다.
+한 번에 사용할 수 있는 최대 칩은 3,000이며, 동률이라면 전 라운드 후순위자가 선순위를 가져갑니다.
+
+카드선택
+1번 플레이어어부터 딜러에게 가서 카드를 선택합니다.
+플레이어가 어떤 카드를 선택했는지는 공개되지 않습니다.
+
+종료논의(10분)
+10분간 플레이어들은 논의 시간을 갖습니다.
+
+이 게임에는 플레이어의 승리를 돕기 위한 두 가지 능력이 존재합니다.
+플레이어들은 게임 도중 단 한 번 '교환' 혹은 '접선' 능력을 사용할 수 있습니다.
+'교환'은 교환카드와 자신의 카드를 1장을 교환합니다.
+'접선'은 타인과 자신의 카드 1장을 교환합니다.
+이 때, 접선은 만약 상대방이 동의하지 않는다면 이루어지지 않으며, 접선 시 두 사람의 능력이 모두 소진됩니다.
+두 능력은 모두 비공개로 이루어지며 '중간논의'와 '종료논의' 때 딜러에게 요청 시 이루어집니다.
+
+6라운드가 끝나면, 모든 플레이어는 자신이 가진 카드 중 한 장을 '팀 카드'로 제출합니다. 이 카드는 팀의 명운을 가를 결정적인 한 장이 됩니다.
+
+만약 자신의 카드가 5장이내에 들어가지 않을 경우 역시 1점을 획득합니다.
+여러 사람의 카드가 가장 높은 족보를 동시에 만족할 경우, 모두 점수를 획득하지 못합니다.
+팀 카드와 공용카드를 합쳐 가장 높은 족보를 완성한 팀은, 팀원 전원이 1점의 승점을 얻으며, 낮은 족보를 완성한 팀은 자신의 카드가 5장이내에 들어가지 않은 사람이 1점을 더 획득합니다.
+
+만약 두 팀의 족보가 동일하다면 무승부로 처리되며, 추가 점수는 획득하지 못합니다.
+
+
+이후, 각 플레이어는 자신에게 남은 카드 5장으로 상대 팀 4명과 1대1로 족보를 비교합니다.
+이길 때마다 1점씩, 승점을 추가로 획득합니다.
+만약 족보가 동일하다면 가진 칩의 개수가 더 많은 플레이어가 승리하며, 칩의 개수도 동일하다면 6라운드 종료시점 시 후순위의 플레이어가 승리합니다.
+
+
+모든 계산이 끝나면, 가장 많은 승점을 쌓은 두 명이 승리, 가장 적은 두 명이 패배 후보가 됩니다.
+만약 동점자가 발생할 경우, 홀덤에서 승리한 팀의 플레이어가 더 높은 순위를 가지며, 이도 같다면 칩의 개수가 더 많은 플레이어가, 이도 같다면 6라운드 종료시점 시 후순위의 플레이어가 더 높은 순위를 얻습니다.
+
+그럼 지금부터 양심의 홀덤, 게임을 시작합니다.`}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
